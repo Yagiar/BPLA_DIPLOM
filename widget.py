@@ -8,7 +8,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QThread, Signal, Slot, Qt
 from PySide6.QtGui import QImage, QPixmap
 from ultralytics import YOLO
-from bytetrack import BYTETracker
+import supervision as sv
+from supervision.tracker.byte_tracker.core import ByteTrack
 
 
 def convert_cv_qt(cv_img):
@@ -36,12 +37,7 @@ class VideoThread(QThread):
         """Установка модели YOLO и инициализация трекера."""
         try:
             self.model = YOLO(model_path)
-            self.tracker = BYTETracker(
-                track_thresh=0.25,
-                track_buffer=30,
-                match_thresh=0.8,
-                frame_rate=30
-            )
+            self.tracker = ByteTrack(frame_rate=30)
             return True
         except Exception as e:
             self.detection_signal.emit(f"Ошибка загрузки модели: {str(e)}")
@@ -57,46 +53,31 @@ class VideoThread(QThread):
             ret, frame = cap.read()
             if ret:
                 if self.model is not None:
-                    try:
-                        # Получаем результаты детекции YOLO
-                        results = self.model(frame)[0]
-                        
-                        # Подготавливаем данные для трекера
-                        detections = []
-                        for box, conf, cls in zip(results.boxes.xyxy.cpu().numpy(), 
-                                                results.boxes.conf.cpu().numpy(),
-                                                results.boxes.cls.cpu().numpy()):
-                            x1, y1, x2, y2 = box
-                            detections.append([x1, y1, x2, y2, conf, cls])
-                        
-                        if len(detections) > 0:
-                            detections = np.array(detections)
-                            # Обновляем трекер
-                            tracks = self.tracker.update(detections, frame)
+                    if self.tracker is not None:
+                        try:
+                            # Получаем результаты детекции YOLO
+                            results = self.model(frame)[0]
+                            
+                            # Преобразуем результаты в объект Detections из supervision
+                            detections = sv.Detections.from_ultralytics(results)
+                            
+                            # Обновляем трекер, используя метод update_with_detections
+                            tracks = self.tracker.update_with_detections(detections)
                             
                             # Отрисовываем результаты трекинга
-                            for track in tracks:
-                                track_id = int(track[4])
-                                class_id = int(track[5])
-                                x1, y1, x2, y2 = map(int, track[:4])
-                                
-                                # Получаем имя класса из модели
+                            for idx in range(len(tracks.xyxy)):
+                                x1, y1, x2, y2 = map(int, tracks.xyxy[idx])
+                                tracker_id = tracks.tracker_id[idx]
+                                class_id = int(tracks.class_id[idx])
                                 class_name = results.names[class_id]
-                                
-                                # Рисуем бокс и метку
                                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                                label = f"{class_name} ID:{track_id}"
-                                cv2.putText(frame, label, (x1, y1 - 10), 
-                                          cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-                                
-                                # Отправляем информацию в лог
-                                self.detection_signal.emit(
-                                    f"Обнаружен объект: {class_name} (ID: {track_id})"
-                                )
-                    
-                    except Exception as e:
-                        self.detection_signal.emit(f"Ошибка при обработке кадра: {str(e)}")
-                
+                                label = f"{class_name} ID:{tracker_id}"
+                                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                                self.detection_signal.emit(f"Обнаружен объект: {class_name} (ID: {tracker_id})")
+                        except Exception as e:
+                            self.detection_signal.emit(f"Ошибка при обработке кадра: {str(e)}")
+                    else:
+                        self.detection_signal.emit("Трекер не инициализирован, пропускаю обработку кадра")
                 self.change_pixmap_signal.emit(frame)
             else:
                 self.change_pixmap_signal.emit(None)
