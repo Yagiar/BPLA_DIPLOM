@@ -94,6 +94,46 @@ class Widget(QWidget):
         super().__init__()
         self.setWindowTitle("Мониторинг БПЛА")
 
+        # Установка стилей для виджета
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #f0f0f0;
+                font-family: Arial, sans-serif;
+            }
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+                border-radius: 12px;
+            }
+            QPushButton:hover {
+                background-color: white;
+                color: black;
+                border: 2px solid #4CAF50;
+            }
+            QLabel#video_label {
+                background-color: black;
+                border: 2px solid #4CAF50;
+                border-radius: 8px;
+            }
+            QTextEdit {
+                background-color: #ffffff;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 10px;
+            }
+            """
+        )
+
         # Флаг успешного подключения камеры
         self.connected = False
 
@@ -111,7 +151,7 @@ class Widget(QWidget):
         # Окно с видео
         self.video_label = QLabel("Окно с видео")
         self.video_label.setFixedSize(640, 480)
-        self.video_label.setStyleSheet("background-color: black;")
+        self.video_label.setObjectName("video_label")
 
         # Панель логов
         self.log_text_edit = QTextEdit()
