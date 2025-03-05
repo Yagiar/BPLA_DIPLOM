@@ -1,0 +1,12 @@
+{
+    "model": {
+        "path": "/Users/otrix/code/BPLA_DIPLOM/yolov8m.pt",
+        "conf": 0.5,
+        "iou": 0.45,
+        "device": "cuda:0",
+        "half": true
+    },
+    "tracker": {
+        "fps": 30
+    }
+}

@@ -8,77 +8,109 @@ from supervision.tracker.byte_tracker.core import ByteTrack
 
 
 def convert_cv_qt(cv_img):
-    """Конвертирует изображение OpenCV (BGR) в QPixmap для отображения в QLabel."""
+    """Конвертирует изображение OpenCV в QImage."""
     rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
     h, w, ch = rgb_image.shape
     bytes_per_line = ch * w
-    qt_img = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
-    return qt_img
+    return QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
 
 class VideoThread(QThread):
     """Поток для захвата видеопотока."""
-    change_pixmap_signal = Signal(object)
-    detection_signal = Signal(str)
+    change_pixmap_signal = Signal(np.ndarray)
+    detection_signal = Signal(str, str)
 
-    def __init__(self, camera_url):
+    def __init__(self, camera_url, conf=0.25, iou=0.45, device='cpu', half=False, fps=30):
         super().__init__()
         self.camera_url = camera_url
-        self._run_flag = True
+        self.running = True
         self.model = None
         self.tracker = None
+        
+        # Настройки модели и трекера
+        self.conf = conf
+        self.iou = iou
+        self.device = device
+        self.half = half
+        self.fps = fps
 
     def set_model(self, model_path):
-        """Установка модели YOLO и инициализация трекера."""
+        """Загружает модель YOLO."""
         try:
             self.model = YOLO(model_path)
-            self.tracker = ByteTrack(frame_rate=30)
+            self.tracker = ByteTrack()
             return True
         except Exception as e:
-            self.detection_signal.emit(f"Ошибка загрузки модели: {str(e)}")
+            self.detection_signal.emit(f"Ошибка загрузки модели: {e}", "red")
             return False
 
-    def run(self):
-        cap = cv2.VideoCapture(self.camera_url)
-        if not cap.isOpened():
-            self.change_pixmap_signal.emit(None)
-            return
+    def update_settings(self, settings):
+        """Обновляет настройки модели и трекера."""
+        if 'conf' in settings:
+            self.conf = settings['conf']
+        if 'iou' in settings:
+            self.iou = settings['iou']
+        if 'device' in settings:
+            self.device = settings['device']
+        if 'half' in settings:
+            self.half = settings['half']
+        if 'fps' in settings:
+            self.fps = settings['fps']
 
-        while self._run_flag:
+    def run(self):
+        """Запускает обработку видеопотока."""
+        cap = cv2.VideoCapture(self.camera_url)
+        frame_delay = 1.0 / self.fps
+
+        while self.running:
             ret, frame = cap.read()
-            if ret:
-                if self.model is not None:
-                    if self.tracker is not None:
-                        try:
-                            # Получаем результаты детекции YOLO
-                            results = self.model(frame)[0]
-                            
-                            # Преобразуем результаты в объект Detections из supervision
-                            detections = sv.Detections.from_ultralytics(results)
-                            
-                            # Обновляем трекер, используя метод update_with_detections
-                            tracks = self.tracker.update_with_detections(detections)
-                            
-                            # Отрисовываем результаты трекинга
-                            for idx in range(len(tracks.xyxy)):
-                                x1, y1, x2, y2 = map(int, tracks.xyxy[idx])
-                                tracker_id = tracks.tracker_id[idx]
-                                class_id = int(tracks.class_id[idx])
-                                class_name = results.names[class_id]
-                                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                                label = f"{class_name} ID:{tracker_id}"
-                                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-                                self.detection_signal.emit(f"Обнаружен объект: {class_name} (ID: {tracker_id})")
-                        except Exception as e:
-                            self.detection_signal.emit(f"Ошибка при обработке кадра: {str(e)}")
-                    else:
-                        self.detection_signal.emit("Трекер не инициализирован, пропускаю обработку кадра")
-                self.change_pixmap_signal.emit(frame)
-            else:
-                self.change_pixmap_signal.emit(None)
+            if not ret:
+                self.detection_signal.emit(f"Ошибка чтения кадра с камеры {self.camera_url}", "red")
                 break
+
+            try:
+                if self.model:
+                    # Получаем результаты детекции
+                    results = self.model.predict(
+                        frame,
+                        conf=self.conf,
+                        iou=self.iou,
+                        device=self.device,
+                        half=self.half
+                    )[0]
+
+                    # Конвертируем результаты в формат для трекера
+                    detections = sv.Detections.from_ultralytics(results)
+
+                    if len(detections) > 0:
+                        # Применяем трекер
+                        tracked_detections = self.tracker.update_with_detections(detections)
+
+                        # Отрисовываем боксы и ID
+                        box_annotator = sv.BoxAnnotator()
+                        frame = box_annotator.annotate(
+                            scene=frame,
+                            detections=tracked_detections
+                        )
+
+                        # Отправляем сообщение о детекции
+                        self.detection_signal.emit(
+                            f"Обнаружено объектов: {len(tracked_detections)}",
+                            "blue"
+                        )
+
+            except Exception as e:
+                self.detection_signal.emit(f"Ошибка обработки кадра: {e}", "red")
+
+            # Отправляем кадр для отображения
+            self.change_pixmap_signal.emit(frame)
+            
+            # Задержка для поддержания заданного FPS
+            cv2.waitKey(int(frame_delay * 1000))
+
         cap.release()
 
     def stop(self):
-        self._run_flag = False
+        """Останавливает поток."""
+        self.running = False
         self.wait() 

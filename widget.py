@@ -11,13 +11,18 @@ from ultralytics import YOLO
 import supervision as sv
 from supervision.tracker.byte_tracker.core import ByteTrack
 from camera_utils import VideoThread, convert_cv_qt
+from settings_dialog import SettingsDialog
+from config import Config
 
 
 class Widget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Мониторинг БПЛА")
-        self.setMinimumSize(1200, 800)
+        self.setMinimumSize(1730, 970)
+
+        # Инициализация конфигурации
+        self.config = Config()
 
         # Установка стилей для виджета
         self.setStyleSheet(
@@ -115,9 +120,12 @@ class Widget(QWidget):
         # Флаг успешного подключения камеры
         self.connected = False
 
-        # Кнопка выбора модели
+        # Кнопки управления
         self.model_button = QPushButton("📁 Выбор модели YOLO")
         self.model_button.clicked.connect(self.select_model)
+        
+        self.settings_button = QPushButton("⚙️ Настройки")
+        self.settings_button.clicked.connect(self.show_settings)
 
         # Контейнер для списка камер
         self.cameras_container = QVBoxLayout()
@@ -150,7 +158,10 @@ class Widget(QWidget):
         video_layout.addWidget(self.log_text_edit)
         
         control_layout = QVBoxLayout()
-        control_layout.addWidget(self.model_button)
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(self.model_button)
+        buttons_layout.addWidget(self.settings_button)
+        control_layout.addLayout(buttons_layout)
         control_layout.addWidget(self.cameras_widget)
         control_layout.addStretch()
         
@@ -163,10 +174,36 @@ class Widget(QWidget):
         # Переменные для работы с видеопотоком
         self.thread = None
         self.selected_camera_url = None
-        self.model_path = None
+        self.model_path = self.config.get_model_settings()['path']
 
         # Загрузка камер из файла
         self.load_cameras()
+
+    def show_settings(self):
+        """Открывает диалог настроек."""
+        dialog = SettingsDialog(self, self.model_path)
+        
+        # Загружаем текущие настройки
+        model_settings = self.config.get_model_settings()
+        tracker_settings = self.config.get_tracker_settings()
+        settings = {
+            'conf': model_settings['conf'],
+            'iou': model_settings['iou'],
+            'device': model_settings['device'],
+            'half': model_settings['half'],
+            'fps': tracker_settings['fps']
+        }
+        dialog.set_settings(settings)
+        
+        if dialog.exec():
+            # Получаем и сохраняем новые настройки
+            new_settings = dialog.get_settings()
+            self.config.update_settings(new_settings)
+            
+            # Если поток запущен, применяем новые настройки
+            if self.thread and self.thread.isRunning():
+                self.thread.update_settings(new_settings)
+                self.log_message("Настройки успешно обновлены", "green")
 
     def log_message(self, message, color="black"):
         """Добавляет сообщение в лог с цветовым форматированием."""
@@ -204,6 +241,7 @@ class Widget(QWidget):
         )
         if file_name:
             self.model_path = file_name
+            self.config.update_model_path(file_name)
             self.log_message(f"Выбрана модель: {file_name}", "blue")
             
             # Если поток уже запущен, обновляем модель
@@ -233,8 +271,19 @@ class Widget(QWidget):
             return
         cap.release()
         
-        # Запуск нового потока
-        self.thread = VideoThread(camera_url)
+        # Получаем текущие настройки
+        model_settings = self.config.get_model_settings()
+        tracker_settings = self.config.get_tracker_settings()
+        
+        # Запуск нового потока с настройками
+        self.thread = VideoThread(
+            camera_url,
+            conf=model_settings['conf'],
+            iou=model_settings['iou'],
+            device=model_settings['device'],
+            half=model_settings['half'],
+            fps=tracker_settings['fps']
+        )
         self.thread.change_pixmap_signal.connect(self.update_video_frame)
         self.thread.detection_signal.connect(self.log_message)
         
@@ -249,19 +298,9 @@ class Widget(QWidget):
 
     @Slot(object)
     def update_video_frame(self, frame):
-        if frame is None:
-            self.log_message(f"Поток с камеры {self.selected_camera_url} упал.", "red")
-            return
-        
-        if not self.connected:
-            self.log_message(f"Подключение к камере {self.selected_camera_url} успешно.", "green")
-            self.connected = True
-            
-        try:
-            qt_pixmap = QPixmap.fromImage(convert_cv_qt(frame))
-            self.video_label.setPixmap(qt_pixmap)
-        except Exception as e:
-            self.log_message(f"Ошибка отображения кадра: {e}", "red")
+        """Обновляет кадр в окне видео."""
+        if frame is not None:
+            self.video_label.setPixmap(QPixmap.fromImage(convert_cv_qt(frame)))
 
     def closeEvent(self, event):
         if self.thread is not None and self.thread.isRunning():

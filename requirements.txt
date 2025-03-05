@@ -4,4 +4,4 @@ ultralytics
 torch
 torchvision
 numpy
-bytetrack
+supervision
