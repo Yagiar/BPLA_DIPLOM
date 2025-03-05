@@ -93,84 +93,148 @@ class Widget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Мониторинг БПЛА")
+        self.setMinimumSize(1200, 800)
 
         # Установка стилей для виджета
         self.setStyleSheet(
             """
             QWidget {
-                background-color: #f0f0f0;
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                              stop:0 #2C3E50, stop:1 #3498DB);
                 font-family: Arial, sans-serif;
             }
+            
+            /* Стиль заголовка */
+            QLabel#title {
+                color: white;
+                font-size: 24px;
+                font-weight: bold;
+                padding: 20px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 10px;
+                margin: 10px;
+            }
+            
             QPushButton {
-                background-color: #4CAF50;
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                              stop:0 #2ECC71, stop:1 #27AE60);
                 color: white;
                 border: none;
-                padding: 10px 20px;
+                padding: 15px 25px;
                 text-align: center;
                 text-decoration: none;
                 display: inline-block;
                 font-size: 16px;
-                margin: 4px 2px;
+                margin: 8px 4px;
                 transition-duration: 0.4s;
                 cursor: pointer;
-                border-radius: 12px;
+                border-radius: 15px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             }
+            
             QPushButton:hover {
-                background-color: white;
-                color: black;
-                border: 2px solid #4CAF50;
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                              stop:0 #27AE60, stop:1 #229954);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
             }
+            
+            QPushButton:pressed {
+                background-color: #229954;
+                transform: translateY(1px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
             QLabel#video_label {
                 background-color: black;
-                border: 2px solid #4CAF50;
-                border-radius: 8px;
-            }
-            QTextEdit {
-                background-color: #ffffff;
-                border: 1px solid #ccc;
-                border-radius: 8px;
+                border: 3px solid #2ECC71;
+                border-radius: 15px;
                 padding: 10px;
+                margin: 10px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+            
+            QTextEdit {
+                background-color: rgba(255, 255, 255, 0.9);
+                border: 2px solid #2ECC71;
+                border-radius: 15px;
+                padding: 15px;
+                margin: 10px;
+                font-size: 14px;
+                color: #2C3E50;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            
+            QScrollBar:vertical {
+                border: none;
+                background-color: rgba(0, 0, 0, 0.1);
+                width: 10px;
+                border-radius: 5px;
+            }
+            
+            QScrollBar::handle:vertical {
+                background-color: #2ECC71;
+                border-radius: 5px;
+            }
+            
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
             }
             """
         )
+
+        # Добавляем заголовок
+        self.title_label = QLabel("Система мониторинга БПЛА")
+        self.title_label.setObjectName("title")
+        self.title_label.setAlignment(Qt.AlignCenter)
 
         # Флаг успешного подключения камеры
         self.connected = False
 
         # Кнопка выбора модели
-        self.model_button = QPushButton("Выбор модели YOLO")
+        self.model_button = QPushButton("📁 Выбор модели YOLO")
         self.model_button.clicked.connect(self.select_model)
 
         # Контейнер для списка камер
         self.cameras_container = QVBoxLayout()
+        self.cameras_container.setSpacing(10)
+        self.cameras_container.setContentsMargins(10, 10, 10, 10)
 
         # Создадим виджет-обёртку для кнопок камер
         self.cameras_widget = QWidget()
         self.cameras_widget.setLayout(self.cameras_container)
 
         # Окно с видео
-        self.video_label = QLabel("Окно с видео")
-        self.video_label.setFixedSize(640, 480)
+        self.video_label = QLabel("Ожидание видеопотока...")
+        self.video_label.setFixedSize(800, 600)
         self.video_label.setObjectName("video_label")
+        self.video_label.setAlignment(Qt.AlignCenter)
 
         # Панель логов
         self.log_text_edit = QTextEdit()
         self.log_text_edit.setReadOnly(True)
+        self.log_text_edit.setMinimumHeight(200)
 
         # Компоновка интерфейса
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.title_label)
+        
+        content_layout = QHBoxLayout()
+        
+        video_layout = QVBoxLayout()
+        video_layout.addWidget(self.video_label)
+        video_layout.addWidget(self.log_text_edit)
+        
         control_layout = QVBoxLayout()
         control_layout.addWidget(self.model_button)
         control_layout.addWidget(self.cameras_widget)
-
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.video_label)
-        main_layout.addWidget(self.log_text_edit)
-
-        layout = QHBoxLayout()
-        layout.addLayout(main_layout)
-        layout.addLayout(control_layout)
-
-        self.setLayout(layout)
+        control_layout.addStretch()
+        
+        content_layout.addLayout(video_layout, stretch=7)
+        content_layout.addLayout(control_layout, stretch=3)
+        
+        main_layout.addLayout(content_layout)
+        self.setLayout(main_layout)
 
         # Переменные для работы с видеопотоком
         self.thread = None
