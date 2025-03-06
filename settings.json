@@ -1,9 +1,9 @@
 {
     "model": {
-        "path": "/Users/otrix/code/BPLA_DIPLOM/yolov8m.pt",
+        "path": "/Users/otrix/code/BPLA_DIPLOM/BPLA_model_10-11-2024.pt",
         "conf": 0.5,
-        "iou": 0.45,
-        "device": "cuda:0",
+        "iou": 0.25,
+        "device": "mps",
         "half": true
     },
     "tracker": {

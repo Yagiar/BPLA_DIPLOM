@@ -1,2 +1,3 @@
-http://192.168.0.101:4747/video
-http://192.168.0.102:8080/video
+/Users/otrix/code/BPLA_DIPLOM/videos/kakoi-to-drone-vodyanoy.mp4
+/Users/otrix/code/BPLA_DIPLOM/videos/roi_dronov_vodyanoy.mp4
+/Users/otrix/code/BPLA_DIPLOM/videos/rutube-uav-fire.mp4
