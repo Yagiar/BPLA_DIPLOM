@@ -13,6 +13,7 @@ from supervision.tracker.byte_tracker.core import ByteTrack
 from camera_utils import VideoThread, convert_cv_qt
 from settings_dialog import SettingsDialog
 from config import Config
+from distance_measure_dialog import DistanceMeasureDialog
 
 
 class Widget(QWidget):
@@ -23,6 +24,10 @@ class Widget(QWidget):
 
         # Инициализация конфигурации
         self.config = Config()
+
+        # Настройки модуля измерения расстояния (будут обновляться через диалог)
+        self.distance_module_enabled = False
+        self.distance_module_baseline = 10.0
 
         # Установка стилей для виджета
         self.setStyleSheet(
@@ -126,6 +131,9 @@ class Widget(QWidget):
         
         self.settings_button = QPushButton("⚙️ Настройки")
         self.settings_button.clicked.connect(self.show_settings)
+        
+        self.distance_button = QPushButton("📏 Измерение расстояния")
+        self.distance_button.clicked.connect(self.open_distance_measure_dialog)
 
         # Контейнер для списка камер
         self.cameras_container = QVBoxLayout()
@@ -161,6 +169,7 @@ class Widget(QWidget):
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.model_button)
         buttons_layout.addWidget(self.settings_button)
+        buttons_layout.addWidget(self.distance_button)
         control_layout.addLayout(buttons_layout)
         control_layout.addWidget(self.cameras_widget)
         control_layout.addStretch()
@@ -178,6 +187,18 @@ class Widget(QWidget):
 
         # Загрузка камер из файла
         self.load_cameras()
+
+    def open_distance_measure_dialog(self):
+        """Открывает диалог измерения расстояния."""
+        dialog = DistanceMeasureDialog(self)
+        if dialog.exec():
+            enabled, selected_cams, baseline = dialog.get_values()
+            self.distance_module_enabled = enabled
+            self.distance_module_baseline = baseline
+            if not enabled:
+                self.log_message("Модуль измерения расстояния отключен.", "blue")
+            else:
+                self.log_message(f"Выбраны камеры для измерения: {selected_cams}, базис: {baseline}", "blue")
 
     def show_settings(self):
         """Открывает диалог настроек."""

@@ -8,5 +8,13 @@
     },
     "tracker": {
         "fps": 30
+    },
+    "distance_measure": {
+        "enabled": true,
+        "baseline": 10.0,
+        "cameras": [
+            "http://192.168.0.103:4747/video",
+            "http://192.168.0.100:4747/video"
+        ]
     }
 }

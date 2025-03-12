@@ -1,3 +1,4 @@
 .env
 .venv
 BPLA_DIPLOM/
+__pycache__/

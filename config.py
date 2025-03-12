@@ -58,4 +58,21 @@ class Config:
     
     def get_tracker_settings(self):
         """Возвращает настройки трекера."""
-        return self.settings['tracker'] 
+        return self.settings['tracker']
+    
+    def update_distance_measure_settings(self, enabled, baseline, cameras=None):
+        """Обновляет настройки модуля измерения расстояния."""
+        if 'distance_measure' not in self.settings:
+            self.settings['distance_measure'] = {}
+        
+        self.settings['distance_measure']['enabled'] = enabled
+        self.settings['distance_measure']['baseline'] = baseline
+        
+        if cameras is not None:
+            self.settings['distance_measure']['cameras'] = cameras
+        
+        self.save_settings()
+    
+    def get_distance_measure_settings(self):
+        """Возвращает настройки модуля измерения расстояния."""
+        return self.settings.get('distance_measure', {}) 
