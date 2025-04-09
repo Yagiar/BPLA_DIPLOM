@@ -16,7 +16,6 @@ from supervision.tracker.byte_tracker.core import ByteTrack
 from camera_utils import VideoThread, convert_cv_qt
 from settings_dialog import SettingsDialog
 from config import Config
-from distance_measure_dialog import DistanceMeasureDialog
 from calibration_module import CalibrationDialog
 from sync_module import SyncDialog
 from distance_module import DistanceCalculatorDialog, DistanceCalculationThread
@@ -154,6 +153,10 @@ class Widget(QWidget):
                 font-size: 14px;
                 spacing: 8px;
                 margin: 5px;
+                color: #FFFFFF;
+                font-size: 14px;
+                background: transparent;
+                padding: 2px;
             }
             
             QRadioButton::indicator {
@@ -187,6 +190,14 @@ class Widget(QWidget):
                 border: none;
                 background-color: transparent;
             }
+
+            QLabel {
+                color: #FFFFFF;
+                font-size: 14px;
+                background: transparent;
+                padding: 2px;
+            }
+
             """
         )
 
@@ -229,7 +240,7 @@ class Widget(QWidget):
         
         # Видео панель
         video_layout = QVBoxLayout()
-        
+
         # Окно с видео
         self.video_label = QLabel("Ожидание видеопотока...")
         self.video_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -237,16 +248,16 @@ class Widget(QWidget):
         self.video_label.setObjectName("video_label")
         self.video_label.setAlignment(Qt.AlignCenter)
         self.video_label.setScaledContents(False)
-        
+
         # Панель логов
         self.log_text_edit = QTextEdit()
         self.log_text_edit.setReadOnly(True)
         self.log_text_edit.setMinimumHeight(100)
         self.log_text_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        
+
         video_layout.addWidget(self.video_label, 7)
         video_layout.addWidget(self.log_text_edit, 3)
-        
+
         # Панель управления (кнопки и список камер)
         control_layout = QVBoxLayout()
         
@@ -438,7 +449,7 @@ class Widget(QWidget):
 
         # Загрузка камер из файла
         self.load_cameras()
-        
+
         # Проверка статуса калибровки и синхронизации
         self.update_calibration_sync_status()
 
@@ -507,17 +518,6 @@ class Widget(QWidget):
         dialog = DistanceCalculatorDialog(self)
         dialog.exec()
 
-    def open_distance_measure_dialog(self):
-        """Открывает диалог измерения расстояния."""
-        dialog = DistanceMeasureDialog(self)
-        if dialog.exec():
-            enabled, selected_cams, baseline = dialog.get_values()
-            self.distance_module_enabled = enabled
-            self.distance_module_baseline = baseline
-            if not enabled:
-                self.log_message("Модуль измерения расстояния отключен.", "blue")
-            else:
-                self.log_message(f"Выбраны камеры для измерения: {selected_cams}, базис: {baseline}", "blue")
 
     def start_distance_measurement(self):
         """Запускает процесс измерения расстояния непосредственно в основном интерфейсе."""
