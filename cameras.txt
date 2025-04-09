@@ -1,7 +1,7 @@
-/Users/otrix/code/BPLA_DIPLOM/videos/kakoi-to-drone-vodyanoy.mp4
-/Users/otrix/code/BPLA_DIPLOM/videos/roi_dronov_vodyanoy.mp4
-/Users/otrix/code/BPLA_DIPLOM/videos/rutube-uav-fire.mp4
-/Users/otrix/code/BPLA_DIPLOM/videos/airplane.mp4
-/Users/otrix/code/BPLA_DIPLOM/videos/birds.mp4
-http://192.168.0.103:4747/video
-http://192.168.0.100:4747/video
+1 /Users/otrix/code/BPLA_DIPLOM/videos/kakoi-to-drone-vodyanoy.mp4
+2 /Users/otrix/code/BPLA_DIPLOM/videos/roi_dronov_vodyanoy.mp4
+3 /Users/otrix/code/BPLA_DIPLOM/videos/rutube-uav-fire.mp4
+4 /Users/otrix/code/BPLA_DIPLOM/videos/airplane.mp4
+5 /Users/otrix/code/BPLA_DIPLOM/videos/birds.mp4
+6 http://192.168.0.103:4747/video
+7 http://192.168.0.100:4747/video

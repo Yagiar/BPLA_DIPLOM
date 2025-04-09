@@ -1,20 +1,26 @@
 {
-    "model": {
-        "path": "/Users/otrix/code/BPLA_DIPLOM/models/united_datasets_airplane_birds_drone_11-03-2025.pt",
-        "conf": 0.01,
-        "iou": 0.25,
-        "device": "mps",
-        "half": false
-    },
-    "tracker": {
-        "fps": 30
-    },
-    "distance_measure": {
-        "enabled": true,
-        "baseline": 10.0,
-        "cameras": [
-            "/Users/otrix/code/BPLA_DIPLOM/videos/kakoi-to-drone-vodyanoy.mp4",
-            "/Users/otrix/code/BPLA_DIPLOM/videos/roi_dronov_vodyanoy.mp4"
-        ]
-    }
+  "model": {
+    "path": "/Users/otrix/code/BPLA_DIPLOM/models/united_datasets_airplane_birds_drone_11-03-2025.pt",
+    "conf": 0.01,
+    "iou": 0.25,
+    "device": "mps",
+    "half": false
+  },
+  "tracker": {
+    "fps": 30
+  },
+  "distance_measure": {
+    "enabled": true,
+    "baseline": 10.0,
+    "cameras": [
+      "/Users/otrix/code/BPLA_DIPLOM/videos/kakoi-to-drone-vodyanoy.mp4",
+      "/Users/otrix/code/BPLA_DIPLOM/videos/roi_dronov_vodyanoy.mp4"
+    ]
+  },
+  "last_camera": "/Users/otrix/code/BPLA_DIPLOM/videos/kakoi-to-drone-vodyanoy.mp4",
+  "last_model": "/Users/otrix/code/BPLA_DIPLOM/BPLA_model_10-11-2024.pt",
+  "detection": {
+    "confidence_threshold": 0.25,
+    "iou_threshold": 0.45
+  }
 }
