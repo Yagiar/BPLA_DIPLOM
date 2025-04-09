@@ -4,7 +4,7 @@
         "conf": 0.01,
         "iou": 0.25,
         "device": "mps",
-        "half": true
+        "half": false
     },
     "tracker": {
         "fps": 30
@@ -13,8 +13,8 @@
         "enabled": true,
         "baseline": 10.0,
         "cameras": [
-            "http://192.168.0.103:4747/video",
-            "http://192.168.0.100:4747/video"
+            "/Users/otrix/code/BPLA_DIPLOM/videos/kakoi-to-drone-vodyanoy.mp4",
+            "/Users/otrix/code/BPLA_DIPLOM/videos/roi_dronov_vodyanoy.mp4"
         ]
     }
 }
