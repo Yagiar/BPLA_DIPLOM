@@ -183,6 +183,141 @@ class SyncDialog(QDialog):
         
         self.setWindowTitle("Синхронизация камер")
         self.resize(1200, 800)
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #F5F6FA;
+            }
+            
+            QGroupBox {
+                background-color: white;
+                border: 1px solid #E1E1E1;
+                border-radius: 8px;
+                margin-top: 1em;
+                padding: 15px;
+                font-weight: bold;
+                color: #2C3E50;
+            }
+            
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+                color: #3498DB;
+            }
+            
+            QLabel {
+                color: #34495E;
+                font-size: 13px;
+                background: transparent;
+                padding: 2px;
+            }
+            
+            QGroupBox QLabel {
+                background-color: transparent;
+                color: #34495E;
+                font-weight: normal;
+            }
+            
+            QFormLayout QLabel {
+                min-width: 150px;
+            }
+            
+            QDoubleSpinBox, QSpinBox {
+                padding: 5px;
+                border: 1px solid #E1E1E1;
+                border-radius: 4px;
+                background: white;
+                min-width: 100px;
+            }
+                           
+            QComboBox {
+                padding: 5px;
+                border: 1px solid #E1E1E1;
+                border-radius: 4px;
+                background: white;
+                color: #34495E;
+            }
+                           
+            QComboBox::drop-down {
+                border: none;
+                width: 50px;
+            }
+            
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #34495E;
+                width: 0;
+                height: 0;
+                margin-right: 5px;
+            }
+            
+            QComboBox:on {
+                border: 1px solid #3498DB;
+            }
+            
+            QComboBox QAbstractItemView {
+                background-color: white;
+                border: 1px solid #E1E1E1;
+                selection-background-color: #3498DB;
+            }
+            
+            QComboBox QAbstractItemView::item {
+                color: #34495E; 
+                background-color: white;
+            }
+            QComboBox QAbstractItemView::item:selected {
+                background-color: #3498DB;
+                color: white;
+                border: 1px solid #2980B9;
+            }
+                           
+            QComboBox QAbstractItemView::item:hover {
+                background-color: #ECF0F1;
+                color: #34495E;
+            }
+            
+            QCheckBox {
+                color: #34495E;
+                background: transparent;
+            }
+            
+            QCheckBox:hover {
+                color: #2980B9;
+            }
+            
+            QPushButton {
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: bold;
+                min-width: 100px;
+            }
+            
+            QPushButton[text="Сохранить"] {
+                background-color: #3498DB;
+                color: white;
+                border: none;
+            }
+            
+            QPushButton[text="Сохранить"]:hover {
+                background-color: #2980B9;
+            }
+            
+            QPushButton[text="Отмена"] {
+                background-color: #E1E1E1;
+                color: #2C3E50;
+                border: none;
+            }
+            
+            QPushButton[text="Отмена"]:hover {
+                background-color: #D1D1D1;
+            }
+            
+            * {
+                outline: none;
+            }
+        """)
         
         # Инициализация интерфейса
         self.init_ui()
