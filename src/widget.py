@@ -142,7 +142,7 @@ class Widget(QWidget):
         """Initialize the handlers."""
         # Mode and model
         self.mode = "detection"  # default mode: detection, distance
-        self.model_path = self.config.get_last_model()
+        self.model_path = self.config.get_model_path()
         
         # Initialize video handler
         self.video_handler = VideoHandler(self.config)
@@ -227,7 +227,7 @@ class Widget(QWidget):
         camera2_url = self.cam2_combo.currentData()
         
         # Always get the latest model path from config
-        self.model_path = self.config.get_last_model()
+        self.model_path = self.config.get_model_path()
         
         if self.distance_handler.start_measurement(camera1_url, camera2_url, self.model_path):
             # Update UI
@@ -352,7 +352,10 @@ class Widget(QWidget):
         )
         if file_name:
             self.model_path = file_name
-            self.config.set_last_model(file_name)
+            
+            # Сохраним путь к модели в конфигурацию
+            self.config.set_model_path(file_name)
+            
             self.log_message(f"Выбрана модель: {file_name}", "blue", both_logs=True)
             
             # If video stream is running, update the model
