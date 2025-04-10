@@ -11,8 +11,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QThread, Signal, Qt, QTimer
 from PySide6.QtGui import QImage, QPixmap
-from camera_utils import convert_cv_qt
-from config import Config
+from src.utils.camera_utils import convert_cv_qt
+from src.core.config import Config
 
 
 class FlashDetector:
