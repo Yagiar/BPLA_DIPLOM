@@ -363,6 +363,7 @@ class Widget(QWidget):
         self.active_cam_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.active_cam_combo.addItem("Камера 1")
         self.active_cam_combo.addItem("Камера 2")
+        self.active_cam_combo.currentIndexChanged.connect(self.on_camera_switch)
         self.active_cam_layout.addWidget(self.active_cam_combo)
         camera_selection_layout.addLayout(self.active_cam_layout)
         
@@ -625,63 +626,78 @@ class Widget(QWidget):
     
     def update_distance_frame(self, original_frame, processed_frame, info):
         """Обновляет кадр и информацию о расстоянии в интерфейсе."""
-        if processed_frame is not None:
-            # Определяем, какую камеру показывать
-            display_index = self.active_cam_combo.currentIndex()
-            frame_to_display = processed_frame if display_index == 0 else original_frame
+        if original_frame is None or processed_frame is None:
+            return  # Пропускаем обработку, если один из кадров отсутствует
             
-            # Сохраняем последний кадр для возможного ресайза
-            self.last_frame = frame_to_display
+        # Определяем, какую камеру показывать
+        display_index = self.active_cam_combo.currentIndex()
+        
+        # Добавляем отладочную информацию один раз в 100 кадров
+        if not hasattr(self, 'debug_counter'):
+            self.debug_counter = 0
+        
+        self.debug_counter += 1
+        if self.debug_counter % 100 == 0:
+            # Очищаем старые отладочные сообщения
+            self.distance_log_text_edit.clear()
+            self.distance_log_text_edit.append(f"Текущий индекс камеры: {display_index}")
+            self.distance_log_text_edit.append(f"Камера 1: {self.cam1_combo.currentText()}")
+            self.distance_log_text_edit.append(f"Камера 2: {self.cam2_combo.currentText()}")
+        
+        # Выбираем кадр на основе индекса активной камеры
+        # Индекс 0 - Камера 1 (original_frame), Индекс 1 - Камера 2 (processed_frame)
+        frame_to_display = original_frame if display_index == 0 else processed_frame
+        
+        # Сохраняем последний кадр для возможного ресайза
+        self.last_distance_frame = frame_to_display.copy()
+        
+        # Также сохраняем оба кадра отдельно для возможности переключения
+        self.cam1_frame = original_frame.copy()
+        self.cam2_frame = processed_frame.copy()
+        
+        # Конвертируем кадр для отображения в формат Qt
+        qt_img = convert_cv_qt(frame_to_display)
+        
+        # Создаем QPixmap из QImage
+        pixmap = QPixmap.fromImage(qt_img)
+        
+        # Масштабируем изображение с сохранением пропорций
+        scaled_pixmap = pixmap.scaled(
+            self.distance_video_label.width(), 
+            self.distance_video_label.height(),
+            Qt.KeepAspectRatio, 
+            Qt.SmoothTransformation
+        )
+        
+        # Отображаем на метке
+        self.distance_video_label.setPixmap(scaled_pixmap)
+        self.distance_video_label.setAlignment(Qt.AlignCenter)
+        
+        # Обновляем информацию о распознанных объектах в лог
+        detections = info.get('detections', {})
+        if detections and self.debug_counter % 30 == 0:  # Обновляем каждые 30 кадров
+            self.distance_log_text_edit.append("Распознанные объекты:")
             
-            # Конвертируем кадр для отображения в формат Qt
-            qt_img = convert_cv_qt(frame_to_display)
-            
-            # Создаем QPixmap из QImage
-            pixmap = QPixmap.fromImage(qt_img)
-            
-            # Масштабируем изображение с сохранением пропорций
-            scaled_pixmap = pixmap.scaled(
-                self.distance_video_label.width(), 
-                self.distance_video_label.height(),
-                Qt.KeepAspectRatio, 
-                Qt.SmoothTransformation
-            )
-            
-            # Отображаем на метке
-            self.distance_video_label.setPixmap(scaled_pixmap)
-            self.distance_video_label.setAlignment(Qt.AlignCenter)
-            
-            # Обновляем информацию о распознанных объектах в лог
-            detections = info.get('detections', {})
-            if detections and len(detections) > 0:
-                # Очищаем лог и добавляем заголовок только раз в 10 кадров, чтобы не мерцал
-                if not hasattr(self, 'frame_counter'):
-                    self.frame_counter = 0
+            # Добавляем только первые 5 объектов для экономии места в логе
+            for i, (obj_id, obj_data) in enumerate(list(detections.items())[:5]):
+                cls_name = obj_data['class']
+                distance = obj_data['distance']
+                confidence = obj_data['confidence']
                 
-                self.frame_counter += 1
-                if self.frame_counter % 10 == 0:
-                    self.distance_log_text_edit.clear()
-                    self.distance_log_text_edit.append("Распознанные объекты:")
+                # Определяем цвет в зависимости от расстояния
+                if distance < 2:  # ближе 2 метров
+                    color = "red"
+                elif distance < 5:  # 2-5 метров
+                    color = "orange"
+                else:
+                    color = "green"
                 
-                for obj_id, obj_data in detections.items():
-                    cls_name = obj_data['class']
-                    distance = obj_data['distance']
-                    confidence = obj_data['confidence']
-                    
-                    # Определяем цвет в зависимости от расстояния
-                    if distance < 2:  # ближе 2 метров
-                        color = "red"
-                    elif distance < 5:  # 2-5 метров
-                        color = "orange"
-                    else:
-                        color = "green"
-                    
-                    # Добавляем сообщение с форматированием
-                    self.distance_log_text_edit.append(
-                        f'<span style="color: {color};"><b>{cls_name}</b> (ID: {obj_id.split("_")[1]}): '
-                        f'{distance:.2f} м (уверенность: {confidence:.2f})</span>'
-                    )
-    
+                # Добавляем сообщение с форматированием
+                self.distance_log_text_edit.append(
+                    f'<span style="color: {color};"><b>{cls_name}</b> (ID: {obj_id.split("_")[1]}): '
+                    f'{distance:.2f} м (увер.: {confidence:.2f})</span>'
+                )
+                
     def on_distance_error(self, error_msg):
         """Обрабатывает ошибки в потоке измерения расстояния."""
         QMessageBox.critical(self, "Ошибка", error_msg)
@@ -985,6 +1001,62 @@ class Widget(QWidget):
             self.distance_thread.stop()
             
         event.accept()
+
+    def on_camera_switch(self, index):
+        """Обработчик переключения камеры в выпадающем списке."""
+        self.distance_log_text_edit.append(f"Переключение на камеру: {index + 1}")
+        
+        # Если у нас есть сохраненные кадры, сразу переключаем отображение
+        if hasattr(self, 'cam1_frame') and hasattr(self, 'cam2_frame'):
+            if index == 0 and self.cam1_frame is not None:
+                self.update_camera_display(self.cam1_frame)
+                self.distance_log_text_edit.append("Отображение переключено на камеру 1")
+            elif index == 1 and self.cam2_frame is not None:
+                self.update_camera_display(self.cam2_frame)
+                self.distance_log_text_edit.append("Отображение переключено на камеру 2")
+    
+    def update_camera_display(self, frame):
+        """Обновляет отображение выбранной камеры."""
+        if frame is None:
+            return
+            
+        # Конвертируем кадр для отображения в формат Qt
+        qt_img = convert_cv_qt(frame)
+        
+        # Создаем QPixmap из QImage
+        pixmap = QPixmap.fromImage(qt_img)
+        
+        # Масштабируем изображение с сохранением пропорций
+        scaled_pixmap = pixmap.scaled(
+            self.distance_video_label.width(), 
+            self.distance_video_label.height(),
+            Qt.KeepAspectRatio, 
+            Qt.SmoothTransformation
+        )
+        
+        # Отображаем на метке
+        self.distance_video_label.setPixmap(scaled_pixmap)
+        self.distance_video_label.setAlignment(Qt.AlignCenter)
+        
+    def refresh_video_stream(self):
+        """Обновляет текущий поток видео."""
+        if hasattr(self, 'distance_thread') and self.distance_thread and self.distance_thread.isRunning():
+            # Получаем текущий индекс выбранной камеры
+            current_camera_index = self.active_cam_combo.currentIndex()
+            self.distance_log_text_edit.append(f"Принудительное обновление потока для камеры {current_camera_index + 1}")
+            
+            # Если у нас есть сохраненные кадры, сразу переключаем отображение
+            if current_camera_index == 0 and hasattr(self, 'cam1_frame') and self.cam1_frame is not None:
+                self.update_camera_display(self.cam1_frame)
+                self.distance_log_text_edit.append("Переключено на камеру 1")
+            elif current_camera_index == 1 and hasattr(self, 'cam2_frame') and self.cam2_frame is not None:
+                self.update_camera_display(self.cam2_frame)
+                self.distance_log_text_edit.append("Переключено на камеру 2")
+            else:
+                self.distance_log_text_edit.append("Сохраненные кадры не найдены, перезапуск потока...")
+                # Перезапускаем поток, если нет сохраненных кадров
+                self.stop_distance_measurement()
+                self.start_distance_measurement()
 
 # Точка входа в приложение
 if __name__ == "__main__":
