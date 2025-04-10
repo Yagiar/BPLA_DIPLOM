@@ -60,35 +60,52 @@
 
 ```sh
 └── BPLA_DIPLOM/
-    ├── BPLA.pyproject
-    ├── BPLA.pyproject.user
-    ├── BPLA_model_10-11-2024.pt
-    ├── LICENSE
-    ├── README.md
-    ├── __pycache__
-    │   ├── camera_utils.cpython-313.pyc
-    │   ├── config.cpython-313.pyc
-    │   └── settings_dialog.cpython-313.pyc
-    ├── camera_utils.py
-    ├── cameras.txt
-    ├── config.py
-    ├── distance_measure_dialog.py
-    ├── form.ui
-    ├── models
+    ├── models/                      # Каталог с моделями YOLO
     │   ├── AOD_detection_model_yolo12n.pt
+    │   ├── BPLA_model_10-11-2024.pt
     │   ├── united_datasets_airplane_birds_drone_11-03-2025.pt
     │   └── yolov8m_coco.pt
-    ├── requirements.txt
-    ├── settings.json
-    ├── settings_dialog.py
-    ├── ui_form.py
-    ├── videos
+    ├── src/                         # Исходный код проекта
+    │   ├── core/                    # Ядро приложения
+    │   │   ├── __init__.py
+    │   │   ├── config.py            # Управление конфигурацией
+    │   │   └── distance_logic.py    # Логика для измерения расстояний
+    │   ├── handlers/                # Обработчики событий и потоков
+    │   │   ├── __init__.py
+    │   │   ├── distance_handler.py  # Обработчик измерения расстояний
+    │   │   ├── log_manager.py       # Управление логами
+    │   │   └── video_handler.py     # Обработчик видеопотока
+    │   ├── modules/                 # Функциональные модули
+    │   │   ├── __init__.py
+    │   │   ├── calibration_module.py # Модуль калибровки камер
+    │   │   ├── distance_module.py   # Модуль измерения расстояний
+    │   │   └── sync_module.py       # Модуль синхронизации камер
+    │   ├── ui/                      # Компоненты пользовательского интерфейса
+    │   │   ├── __init__.py
+    │   │   ├── app_styles.py        # Стили приложения
+    │   │   ├── settings_dialog.py   # Диалог настроек
+    │   │   └── ui_components.py     # Фабрика UI компонентов
+    │   ├── utils/                   # Вспомогательные утилиты
+    │   │   ├── __init__.py
+    │   │   ├── camera_loader.py     # Загрузка камер из файла
+    │   │   └── camera_utils.py      # Утилиты для работы с камерами
+    │   ├── __init__.py
+    │   └── widget.py                # Основной виджет приложения
+    ├── videos/                      # Тестовые видеофайлы
     │   ├── airplane.mp4
     │   ├── birds.mp4
     │   ├── kakoi-to-drone-vodyanoy.mp4
     │   ├── roi_dronov_vodyanoy.mp4
     │   └── rutube-uav-fire.mp4
-    └── widget.py
+    ├── .env
+    ├── .gitignore
+    ├── cameras.txt                  # Список камер/видеопотоков
+    ├── LICENSE
+    ├── logo.png                     # Логотип приложения
+    ├── main.py                      # Точка входа в приложение
+    ├── README.md
+    ├── requirements.txt             # Зависимости проекта
+    └── settings.json                # Файл конфигурации
 ```
 
 ### Project Index
