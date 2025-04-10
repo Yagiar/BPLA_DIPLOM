@@ -560,15 +560,15 @@ class DistanceCalculatorDialog(QDialog):
             
         # Проверяем настройки, если есть модель по умолчанию
         if self.parent() and hasattr(self.parent(), 'config'):
-            # Используем get_last_model вместо get_model_settings
-            last_model = self.parent().config.get_last_model()
-            if last_model:
-                index = self.model_combo.findText(last_model)
+            # Используем get_model_path вместо get_last_model
+            default_model = self.parent().config.get_model_path()
+            if default_model:
+                index = self.model_combo.findText(default_model)
                 if index >= 0:
                     self.model_combo.setCurrentIndex(index)
                 else:
                     # Если модель не найдена в списке, добавляем её
-                    self.model_combo.addItem(last_model)
+                    self.model_combo.addItem(default_model)
                     self.model_combo.setCurrentIndex(self.model_combo.count() - 1)
     
     def load_calibration_data(self):

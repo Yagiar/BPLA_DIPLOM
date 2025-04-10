@@ -11,7 +11,7 @@ class VideoHandler(QObject):
         self.config = config
         self.thread = None
         self.selected_camera_url = None
-        self.model_path = self.config.get_last_model()
+        self.model_path = self.config.get_model_path()
 
     def select_camera(self, camera_url):
         """Select and start the video stream for the chosen camera."""
@@ -26,15 +26,16 @@ class VideoHandler(QObject):
         cap.release()
 
         # Get the latest model path from config
-        self.model_path = self.config.get_last_model()
+        self.model_path = self.config.get_model_path()
 
         # Start new video thread
+        model_settings = self.config.get_model_settings()
         self.thread = VideoThread(
             camera_url,
             conf=self.config.get_detection_settings()['confidence_threshold'],
             iou=self.config.get_detection_settings()['iou_threshold'],
-            device='cpu',
-            half=False,
+            device=model_settings.get('device', 'cpu'),
+            half=model_settings.get('half', False),
             fps=30
         )
         # Connect the signal with a conversion slot

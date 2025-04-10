@@ -27,6 +27,13 @@ class Config:
     def _create_default_config(self):
         """Создает конфигурацию по умолчанию."""
         default_config = {
+            "model": {
+                "path": "",
+                "conf": 0.25,
+                "iou": 0.45,
+                "device": "cpu",
+                "half": False
+            },
             "last_camera": "",
             "last_model": "",
             "ui": {
@@ -221,6 +228,65 @@ class Config:
     def get_sync_status(self):
         """Возвращает статус синхронизации."""
         return self.config.get("sync", {"synced": False})
+    
+    def get_model_path(self):
+        """Возвращает путь к модели из секции model."""
+        if "model" not in self.config:
+            self.config["model"] = {"path": ""}
+            
+        return self.config["model"].get("path", "")
+        
+    def set_model_path(self, model_path):
+        """Устанавливает путь к модели в секции model."""
+        if "model" not in self.config:
+            self.config["model"] = {"path": ""}
+            
+        self.config["model"]["path"] = model_path
+        
+        # Для совместимости обновим и last_model
+        self.config["last_model"] = model_path
+        
+        self.update_config()
+        
+    def get_model_settings(self):
+        """Возвращает все настройки модели."""
+        return self.config.get("model", {
+            "path": "",
+            "conf": 0.25,
+            "iou": 0.45,
+            "device": "cpu",
+            "half": False
+        })
+        
+    def set_model_settings(self, path=None, conf=None, iou=None, device=None, half=None):
+        """Устанавливает настройки модели."""
+        if "model" not in self.config:
+            self.config["model"] = {
+                "path": "",
+                "conf": 0.25,
+                "iou": 0.45,
+                "device": "cpu",
+                "half": False
+            }
+        
+        if path is not None:
+            self.config["model"]["path"] = path
+            # Для совместимости обновим и last_model
+            self.config["last_model"] = path
+            
+        if conf is not None:
+            self.config["model"]["conf"] = conf
+            
+        if iou is not None:
+            self.config["model"]["iou"] = iou
+            
+        if device is not None:
+            self.config["model"]["device"] = device
+            
+        if half is not None:
+            self.config["model"]["half"] = half
+            
+        self.update_config()
 
 
 if __name__ == "__main__":
