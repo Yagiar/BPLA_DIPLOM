@@ -12,6 +12,7 @@ from PySide6.QtCore import Qt, Signal, QThread, QMutex, QTimer
 from PySide6.QtGui import QImage, QPixmap, QFont
 from ultralytics import YOLO
 import math
+import supervision as sv
 
 class DistanceCalculationThread(QThread):
     frame_signal = Signal(object, object, dict)  # Кадр, обработанный кадр с расстояниями, метаданные
@@ -82,6 +83,16 @@ class DistanceCalculationThread(QThread):
         if self.sync_data:
             drift_rate = self.sync_data.get('drift_rate', 0)
         
+        # Инициализация аннотаторов supervision
+        tracker1 = sv.ByteTrack()
+        tracker2 = sv.ByteTrack()
+        box_annotator1 = sv.BoundingBoxAnnotator()
+        box_annotator2 = sv.BoundingBoxAnnotator()
+        label_annotator1 = sv.LabelAnnotator()
+        label_annotator2 = sv.LabelAnnotator()
+        trace_annotator1 = sv.TraceAnnotator()
+        trace_annotator2 = sv.TraceAnnotator()
+        
         frame_count = 0
         start_time = time.time()
         
@@ -119,100 +130,104 @@ class DistanceCalculationThread(QThread):
                 except Exception as e:
                     print(f"Ошибка коррекции искажений камеры 2: {e}")
             
-            # Распознавание объектов на обоих кадрах
-            results1 = model(frame1)
-            results2 = model(frame2)
-            
             # Создаем копии для отображения
             display_frame1 = frame1.copy()
             display_frame2 = frame2.copy()
             
             # Добавляем маркеры на кадры, чтобы их можно было отличить
-            cv2.putText(display_frame1, "CAM 1", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
-            cv2.putText(display_frame2, "CAM 2", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+            cv2.putText(display_frame1, "CAM 1", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+            cv2.putText(display_frame2, "CAM 2", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
             
             # Обрабатываем результаты
             detections = {}
             
-            # Создаем словари для хранения нарисованных объектов на каждой камере
-            objects_cam1 = {}
-            objects_cam2 = {}
-            
             # Список всех обнаруженных объектов для поиска соответствий
             all_detected_objects = []
             
-            # Обрабатываем объекты с первой камеры
-            if len(results1) > 0:
-                boxes1 = results1[0].boxes
-                for i, box in enumerate(boxes1):
-                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(int)
-                    conf = float(box.conf)
-                    cls_id = int(box.cls)
-                    cls_name = model.names[cls_id]
-                    
-                    center_x1 = (x1 + x2) // 2
-                    center_y1 = (y1 + y2) // 2
-                    
-                    # Добавляем в список для последующего поиска соответствий
-                    all_detected_objects.append({
-                        'camera': 1,
-                        'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2,
-                        'center_x': center_x1, 'center_y': center_y1,
-                        'cls_id': cls_id, 'cls_name': cls_name, 'conf': conf,
-                        'box_index': i
-                    })
-                    
-                    # Временный идентификатор объекта
-                    obj_id = f"{cls_name}_{i}"
-                    objects_cam1[obj_id] = {
-                        'bbox': (x1, y1, x2, y2),
-                        'center': (center_x1, center_y1),
-                        'class': cls_name,
-                        'class_id': cls_id,
-                        'confidence': conf
-                    }
+            # Распознавание объектов на обоих кадрах
+            results1 = model(display_frame1)
+            results2 = model(display_frame2)
             
-            # Обрабатываем объекты со второй камеры
-            if len(results2) > 0:
-                boxes2 = results2[0].boxes
-                for i, box in enumerate(boxes2):
-                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(int)
-                    conf = float(box.conf)
-                    cls_id = int(box.cls)
-                    cls_name = model.names[cls_id]
-                    
-                    center_x2 = (x1 + x2) // 2
-                    center_y2 = (y1 + y2) // 2
-                    
-                    # Добавляем в список для последующего поиска соответствий
-                    all_detected_objects.append({
-                        'camera': 2,
-                        'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2,
-                        'center_x': center_x2, 'center_y': center_y2,
-                        'cls_id': cls_id, 'cls_name': cls_name, 'conf': conf,
-                        'box_index': i
-                    })
-                    
-                    # Временный идентификатор объекта
-                    obj_id = f"{cls_name}_{i}"
-                    objects_cam2[obj_id] = {
-                        'bbox': (x1, y1, x2, y2),
-                        'center': (center_x2, center_y2),
-                        'class': cls_name,
-                        'class_id': cls_id,
-                        'confidence': conf
-                    }
+            # Конвертируем результаты для камеры 1
+            sv_detections1 = sv.Detections.from_ultralytics(results1[0])
+            # Обновляем трекер
+            sv_detections1 = tracker1.update_with_detections(sv_detections1)
+            
+            # Конвертируем результаты для камеры 2
+            sv_detections2 = sv.Detections.from_ultralytics(results2[0])
+            # Обновляем трекер
+            sv_detections2 = tracker2.update_with_detections(sv_detections2)
+            
+            # Создаем структуры данных для сопоставления объектов
+            objects_cam1 = []
+            objects_cam2 = []
+            
+            # Наполняем список объектов с камеры 1
+            for i, (class_id, tracker_id, box) in enumerate(zip(sv_detections1.class_id, sv_detections1.tracker_id, sv_detections1.xyxy)):
+                conf = sv_detections1.confidence[i] if sv_detections1.confidence is not None else 1.0
+                cls_name = results1[0].names[class_id]
+                x1, y1, x2, y2 = box
+                center_x = (x1 + x2) / 2
+                center_y = (y1 + y2) / 2
+                
+                obj = {
+                    'camera': 1,
+                    'class_id': class_id,
+                    'tracker_id': tracker_id,
+                    'class_name': cls_name,
+                    'confidence': conf,
+                    'box': box,
+                    'center_x': center_x,
+                    'center_y': center_y
+                }
+                
+                objects_cam1.append(obj)
+                all_detected_objects.append(obj)
+                
+            # Наполняем список объектов с камеры 2
+            for i, (class_id, tracker_id, box) in enumerate(zip(sv_detections2.class_id, sv_detections2.tracker_id, sv_detections2.xyxy)):
+                conf = sv_detections2.confidence[i] if sv_detections2.confidence is not None else 1.0
+                cls_name = results2[0].names[class_id]
+                x1, y1, x2, y2 = box
+                center_x = (x1 + x2) / 2
+                center_y = (y1 + y2) / 2
+                
+                obj = {
+                    'camera': 2,
+                    'class_id': class_id,
+                    'tracker_id': tracker_id,
+                    'class_name': cls_name,
+                    'confidence': conf,
+                    'box': box,
+                    'center_x': center_x,
+                    'center_y': center_y
+                }
+                
+                objects_cam2.append(obj)
+                all_detected_objects.append(obj)
             
             # Находим соответствия между объектами и вычисляем расстояния
             matched_pairs = []
             
-            for obj1 in [obj for obj in all_detected_objects if obj['camera'] == 1]:
+            # Подготовка labels для аннотаций
+            labels1 = []
+            labels2 = []
+            
+            # Сначала добавляем стандартные метки с ID и классом
+            for obj in objects_cam1:
+                labels1.append(f"#{obj['tracker_id']} {obj['class_name']}")
+            
+            for obj in objects_cam2:
+                labels2.append(f"#{obj['tracker_id']} {obj['class_name']}")
+            
+            # Находим соответствия и рассчитываем расстояния
+            for obj1 in objects_cam1:
                 best_match = None
                 min_distance = float('inf')
                 
-                for obj2 in [obj for obj in all_detected_objects if obj['camera'] == 2]:
+                for obj2 in objects_cam2:
                     # Проверяем, что это тот же класс объекта
-                    if obj1['cls_id'] == obj2['cls_id']:
+                    if obj1['class_id'] == obj2['class_id']:
                         # Диспаритет - это разница в x-координатах центра объекта
                         disparity = abs(obj1['center_x'] - obj2['center_x'])
                         
@@ -232,95 +247,58 @@ class DistanceCalculationThread(QThread):
                                 best_match = obj2
                                 best_match['distance'] = distance
                 
-                # Если найдено соответствие, сохраняем пару и рисуем на обоих кадрах
+                # Если найдено соответствие, сохраняем пару и обновляем метки
                 if best_match:
                     matched_pairs.append((obj1, best_match))
+                    distance = best_match['distance'] / 100  # Преобразуем в метры
                     
-                    distance = best_match['distance']
+                    # Обновляем метку для объекта из камеры 1
+                    idx = objects_cam1.index(obj1)
+                    labels1[idx] = f"#{obj1['tracker_id']} {obj1['class_name']} {distance:.2f}m"
                     
-                    # Цвет зависит от расстояния
-                    if distance < 200:  # ближе 2 метров
-                        color = (0, 0, 255)  # красный для близких объектов
-                    elif distance < 500:  # 2-5 метров
-                        color = (0, 255, 255)  # желтый для среднего расстояния
-                    else:
-                        color = (0, 255, 0)  # зеленый для далеких объектов
-                    
-                    # Рисуем на первом кадре
-                    cv2.rectangle(display_frame1, 
-                                 (obj1['x1'], obj1['y1']), 
-                                 (obj1['x2'], obj1['y2']), 
-                                 color, 2)
-                    
-                    # Текст с информацией на первом кадре
-                    label1 = f"{obj1['cls_name']} {distance/100:.2f}m"
-                    cv2.putText(display_frame1, label1, 
-                               (obj1['x1'], obj1['y1'] - 10), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                    
-                    # Рисуем на втором кадре
-                    cv2.rectangle(display_frame2, 
-                                 (best_match['x1'], best_match['y1']), 
-                                 (best_match['x2'], best_match['y2']), 
-                                 color, 2)
-                    
-                    # Текст с информацией на втором кадре
-                    label2 = f"{best_match['cls_name']} {distance/100:.2f}m"
-                    cv2.putText(display_frame2, label2, 
-                               (best_match['x1'], best_match['y1'] - 10), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    # Обновляем метку для объекта из камеры 2
+                    idx = objects_cam2.index(best_match)
+                    labels2[idx] = f"#{best_match['tracker_id']} {best_match['class_name']} {distance:.2f}m"
                     
                     # Добавляем в общий список детекций для интерфейса
-                    obj_id = f"{obj1['cls_name']}_{obj1['box_index']}"
-                    detections[obj_id] = {
-                        'class': obj1['cls_name'],
-                        'distance': distance/100,  # в метрах
+                    detections[f"{obj1['class_name']}_{obj1['tracker_id']}"] = {
+                        'class': obj1['class_name'],
+                        'distance': distance,  # в метрах
                         'position_cam1': (obj1['center_x'], obj1['center_y']),
                         'position_cam2': (best_match['center_x'], best_match['center_y']),
-                        'bbox_cam1': (obj1['x1'], obj1['y1'], obj1['x2'], obj1['y2']),
-                        'bbox_cam2': (best_match['x1'], best_match['y1'], best_match['x2'], best_match['y2']),
-                        'confidence': obj1['conf'] * best_match['conf']  # комбинированная уверенность
+                        'bbox_cam1': obj1['box'],
+                        'bbox_cam2': best_match['box'],
+                        'confidence': obj1['confidence'] * best_match['confidence']  # комбинированная уверенность
                     }
             
-            # Рисуем непарные объекты на первой камере
-            for obj_id, obj_data in objects_cam1.items():
-                # Пропускаем объекты, которые уже обработаны в парах
-                if any(matched_obj1['box_index'] == int(obj_id.split('_')[1]) and 
-                       matched_obj1['cls_name'] == obj_data['class'] 
-                       for matched_obj1, _ in matched_pairs):
-                    continue
-                
-                # Рисуем объект без информации о расстоянии
-                x1, y1, x2, y2 = obj_data['bbox']
-                cls_name = obj_data['class']
-                
-                # Серый цвет для объектов без пары
-                color = (128, 128, 128)
-                
-                cv2.rectangle(display_frame1, (x1, y1), (x2, y2), color, 2)
-                label = f"{cls_name} (no match)"
-                cv2.putText(display_frame1, label, (x1, y1 - 10), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            # Аннотируем кадры с помощью supervision
+            annotated_frame1 = box_annotator1.annotate(
+                display_frame1.copy(),
+                detections=sv_detections1
+            )
+            annotated_frame1 = label_annotator1.annotate(
+                annotated_frame1,
+                detections=sv_detections1,
+                labels=labels1
+            )
+            annotated_frame1 = trace_annotator1.annotate(
+                annotated_frame1,
+                detections=sv_detections1
+            )
             
-            # Рисуем непарные объекты на второй камере
-            for obj_id, obj_data in objects_cam2.items():
-                # Пропускаем объекты, которые уже обработаны в парах
-                if any(matched_obj2['box_index'] == int(obj_id.split('_')[1]) and 
-                       matched_obj2['cls_name'] == obj_data['class'] 
-                       for _, matched_obj2 in matched_pairs):
-                    continue
-                
-                # Рисуем объект без информации о расстоянии
-                x1, y1, x2, y2 = obj_data['bbox']
-                cls_name = obj_data['class']
-                
-                # Серый цвет для объектов без пары
-                color = (128, 128, 128)
-                
-                cv2.rectangle(display_frame2, (x1, y1), (x2, y2), color, 2)
-                label = f"{cls_name} (no match)"
-                cv2.putText(display_frame2, label, (x1, y1 - 10), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            annotated_frame2 = box_annotator2.annotate(
+                display_frame2.copy(),
+                detections=sv_detections2
+            )
+            annotated_frame2 = label_annotator2.annotate(
+                annotated_frame2,
+                detections=sv_detections2,
+                labels=labels2
+            )
+            annotated_frame2 = trace_annotator2.annotate(
+                annotated_frame2,
+                detections=sv_detections2
+            )
             
             # Добавляем информацию о кадре
             frame_info = {
@@ -331,7 +309,7 @@ class DistanceCalculationThread(QThread):
             }
             
             # Отправляем данные в основной поток - оба обработанных кадра
-            self.frame_signal.emit(display_frame1, display_frame2, frame_info)
+            self.frame_signal.emit(annotated_frame1, annotated_frame2, frame_info)
             
             frame_count += 1
             
