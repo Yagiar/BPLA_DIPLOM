@@ -97,7 +97,6 @@
     │   ├── kakoi-to-drone-vodyanoy.mp4
     │   ├── roi_dronov_vodyanoy.mp4
     │   └── rutube-uav-fire.mp4
-    ├── .env
     ├── .gitignore
     ├── cameras.txt                  # Список камер/видеопотоков
     ├── LICENSE
@@ -107,114 +106,6 @@
     ├── requirements.txt             # Зависимости проекта
     └── settings.json                # Файл конфигурации
 ```
-
-### Project Index
-
-<details open>
-	<summary><b><code>BPLA_DIPLOM/</code></b></summary>
-	<!-- __root__ Submodule -->
-	<details>
-		<summary><b>__root__</b></summary>
-		<blockquote>
-			<div class='directory-path' style='padding: 8px 0; color: #666;'>
-				<code><b>⦿ __root__</b></code>
-			<table style='width: 100%; border-collapse: collapse;'>
-			<thead>
-				<tr style='background-color: #f8f9fa;'>
-					<th style='width: 30%; text-align: left; padding: 8px;'>File Name</th>
-					<th style='text-align: left; padding: 8px;'>Summary</th>
-				</tr>
-			</thead>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/ui_form.py'>ui_form.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/BPLA.pyproject'>BPLA.pyproject</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/config.py'>config.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/widget.py'>widget.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/settings.json'>settings.json</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/LICENSE'>LICENSE</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/requirements.txt'>requirements.txt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/BPLA.pyproject.user'>BPLA.pyproject.user</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/camera_utils.py'>camera_utils.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/cameras.txt'>cameras.txt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/form.ui'>form.ui</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/distance_measure_dialog.py'>distance_measure_dialog.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/BPLA_model_10-11-2024.pt'>BPLA_model_10-11-2024.pt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/settings_dialog.py'>settings_dialog.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-			</table>
-		</blockquote>
-	</details>
-	<!-- models Submodule -->
-	<details>
-		<summary><b>models</b></summary>
-		<blockquote>
-			<div class='directory-path' style='padding: 8px 0; color: #666;'>
-				<code><b>⦿ models</b></code>
-			<table style='width: 100%; border-collapse: collapse;'>
-			<thead>
-				<tr style='background-color: #f8f9fa;'>
-					<th style='width: 30%; text-align: left; padding: 8px;'>File Name</th>
-					<th style='text-align: left; padding: 8px;'>Summary</th>
-				</tr>
-			</thead>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/models/AOD_detection_model_yolo12n.pt'>AOD_detection_model_yolo12n.pt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/models/united_datasets_airplane_birds_drone_11-03-2025.pt'>united_datasets_airplane_birds_drone_11-03-2025.pt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='https://github.com/Yagiar/BPLA_DIPLOM/blob/master/models/yolov8m_coco.pt'>yolov8m_coco.pt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-			</table>
-		</blockquote>
-	</details>
-</details>
-
----
 
 ## Getting Started
 
@@ -232,19 +123,19 @@ Build BPLA_DIPLOM from the source and intsall dependencies:
 1. **Clone the repository:**
 
     ```sh
-    ❯ git clone https://github.com/Yagiar/BPLA_DIPLOM
+      git clone https://github.com/Yagiar/BPLA_DIPLOM
     ```
 
 2. **Navigate to the project directory:**
 
     ```sh
-    ❯ cd BPLA_DIPLOM
+      cd BPLA_DIPLOM
     ```
 
 3. **Install the dependencies:**
 
 	```sh
-	❯ pip install -r requirements.txt
+	  pip install -r requirements.txt
 	```
 
 ### Usage
@@ -252,69 +143,9 @@ Build BPLA_DIPLOM from the source and intsall dependencies:
 Run the project with:
 
 **Using [pip](https://pypi.org/project/pip/):**
-```sh
-python widget.py
-```
-
-### Testing
-
-Bpla_diplom uses the {__test_framework__} test framework. Run the test suite with:
-
-**Using [pip](https://pypi.org/project/pip/):**
-```sh
-pytest
-```
-
----
-
-## Roadmap
-
-- [X] **`Task 1`**: <strike>Implement feature one.</strike>
-- [ ] **`Task 2`**: Implement feature two.
-- [ ] **`Task 3`**: Implement feature three.
-
----
-
-## Contributing
-
-- **💬 [Join the Discussions](https://github.com/Yagiar/BPLA_DIPLOM/discussions)**: Share your insights, provide feedback, or ask questions.
-- **🐛 [Report Issues](https://github.com/Yagiar/BPLA_DIPLOM/issues)**: Submit bugs found or log feature requests for the `BPLA_DIPLOM` project.
-- **💡 [Submit Pull Requests](https://github.com/Yagiar/BPLA_DIPLOM/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
-
-<details closed>
-<summary>Contributing Guidelines</summary>
-
-1. **Fork the Repository**: Start by forking the project repository to your github account.
-2. **Clone Locally**: Clone the forked repository to your local machine using a git client.
-   ```sh
-   git clone https://github.com/Yagiar/BPLA_DIPLOM
-   ```
-3. **Create a New Branch**: Always work on a new branch, giving it a descriptive name.
-   ```sh
-   git checkout -b new-feature-x
-   ```
-4. **Make Your Changes**: Develop and test your changes locally.
-5. **Commit Your Changes**: Commit with a clear message describing your updates.
-   ```sh
-   git commit -m 'Implemented new feature x.'
-   ```
-6. **Push to github**: Push the changes to your forked repository.
-   ```sh
-   git push origin new-feature-x
-   ```
-7. **Submit a Pull Request**: Create a PR against the original project repository. Clearly describe the changes and their motivations.
-8. **Review**: Once your PR is reviewed and approved, it will be merged into the main branch. Congratulations on your contribution!
-</details>
-
-<details closed>
-<summary>Contributor Graph</summary>
-<br>
-<p align="left">
-   <a href="https://github.com{/Yagiar/BPLA_DIPLOM/}graphs/contributors">
-      <img src="https://contrib.rocks/image?repo=Yagiar/BPLA_DIPLOM">
-   </a>
-</p>
-</details>
+	```sh
+	  python main.py
+	```
 
 ---
 

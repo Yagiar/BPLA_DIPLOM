@@ -27,16 +27,32 @@ class DistanceHandler(QObject):
         self.update_current_frame()
         
     def start_measurement(self, camera1_url, camera2_url, model_path):
-        """Start the distance measurement process."""
-        # Load calibration and sync data
-        calibration_data = DistanceLogic.load_calibration_data()
-        sync_data = DistanceLogic.load_sync_data()
+        """Start the distance measurement with given cameras and model.
         
-        # Check camera and model selection
+        Args:
+            camera1_url: URL of the first camera
+            camera2_url: URL of the second camera
+            model_path: Path to the YOLO model file
+            
+        Returns:
+            bool: Whether the measurement was started successfully
+        """
+        # Validate cameras
         if not DistanceLogic.check_camera_selection(camera1_url, camera2_url):
             return False
             
+        # Validate model
         if not DistanceLogic.check_model_selection(model_path):
+            return False
+            
+        # Load calibration data
+        calibration_data = DistanceLogic.load_calibration_data()
+        if calibration_data is None:
+            return False
+            
+        # Load sync data
+        sync_data = DistanceLogic.load_sync_data()
+        if sync_data is None:
             return False
             
         # Check warnings
@@ -51,12 +67,21 @@ class DistanceHandler(QObject):
         distance_settings = self.config.get_distance_measure_settings()
         if 'baseline' in distance_settings:
             baseline = distance_settings['baseline']
+            
+        # Получаем настройки модели из секции model
+        model_settings = self.config.get_model_settings()
         
         # Create new thread for distance measurement
         self.distance_thread = DistanceCalculationThread(
             camera1_url, camera2_url, model_path, baseline, 
             calibration_data, sync_data
         )
+        
+        # Устанавливаем настройки модели из конфигурации
+        self.distance_thread.conf = model_settings['conf']
+        self.distance_thread.iou = model_settings['iou']
+        self.distance_thread.device = model_settings['device']
+        self.distance_thread.half = model_settings['half']
         
         # Connect signals
         self.distance_thread.frame_signal.connect(self.process_frames)
@@ -71,6 +96,8 @@ class DistanceHandler(QObject):
         self.log_signal.emit(f"Камера 2: {camera2_url}", "black", False)
         self.log_signal.emit(f"Модель: {model_path}", "black", False)
         self.log_signal.emit(f"Базис: {baseline} см", "black", False)
+        self.log_signal.emit(f"Порог уверенности: {model_settings['conf']}", "black", False)
+        self.log_signal.emit(f"Порог IOU: {model_settings['iou']}", "black", False)
         
         return True
         

@@ -30,6 +30,12 @@ class DistanceCalculationThread(QThread):
         self.lock = QMutex()
         self.detected_objects = {}
         
+        # Параметры модели YOLO (настройки по умолчанию)
+        self.conf = 0.25  # Значение по умолчанию
+        self.iou = 0.45   # Значение по умолчанию
+        self.device = 'cpu'  # По умолчанию CPU
+        self.half = False  # По умолчанию без half-precision
+        
     def run(self):
         self.running = True
         
@@ -145,8 +151,21 @@ class DistanceCalculationThread(QThread):
             all_detected_objects = []
             
             # Распознавание объектов на обоих кадрах
-            results1 = model(display_frame1)
-            results2 = model(display_frame2)
+            results1 = model(
+                display_frame1,
+                conf=self.conf,
+                iou=self.iou,
+                device=self.device,
+                half=self.half
+            )
+            
+            results2 = model(
+                display_frame2,
+                conf=self.conf,
+                iou=self.iou,
+                device=self.device,
+                half=self.half
+            )
             
             # Конвертируем результаты для камеры 1
             sv_detections1 = sv.Detections.from_ultralytics(results1[0])

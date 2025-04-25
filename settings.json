@@ -4,7 +4,7 @@
     "conf": 0.01,
     "iou": 0.25,
     "device": "mps",
-    "half": false
+    "half": true
   },
   "tracker": {
     "fps": 30

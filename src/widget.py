@@ -250,14 +250,14 @@ class Widget(QWidget):
         """Open the settings dialog."""
         dialog = SettingsDialog(self, self.model_path)
         
-        # Load current settings
-        detection_settings = self.config.get_detection_settings()
+        # Load current settings from model section instead of detection
+        model_settings = self.config.get_model_settings()
         settings = {
-            'conf': detection_settings['confidence_threshold'],
-            'iou': detection_settings['iou_threshold'],
-            'device': 'cpu',  # Default value
-            'half': False,    # Default value
-            'fps': 30        # Default value for FPS
+            'conf': model_settings['conf'],
+            'iou': model_settings['iou'],
+            'device': model_settings['device'],
+            'half': model_settings['half'],
+            'fps': 30  # Default value for FPS
         }
         dialog.set_settings(settings)
         
@@ -265,10 +265,12 @@ class Widget(QWidget):
             # Get and save new settings
             new_settings = dialog.get_settings()
             
-            # Update detection settings
-            self.config.set_detection_settings(
-                confidence_threshold=new_settings.get('conf'),
-                iou_threshold=new_settings.get('iou')
+            # Update model settings instead of detection settings
+            self.config.set_model_settings(
+                conf=new_settings.get('conf'),
+                iou=new_settings.get('iou'),
+                device=new_settings.get('device'),
+                half=new_settings.get('half')
             )
             
             # If video stream is running, apply new settings

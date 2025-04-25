@@ -14,40 +14,37 @@ class VideoHandler(QObject):
         self.model_path = self.config.get_model_path()
 
     def select_camera(self, camera_url):
-        """Select and start the video stream for the chosen camera."""
-        self.selected_camera_url = camera_url
-        self.stop_video_stream()
-
-        # Check camera availability
-        cap = cv2.VideoCapture(camera_url)
-        if not cap.isOpened():
-            cap.release()
-            return False
-        cap.release()
-
-        # Get the latest model path from config
-        self.model_path = self.config.get_model_path()
-
-        # Start new video thread
+        """Выбирает камеру и запускает видеопоток."""
+        if self.thread and self.thread.isRunning():
+            self.thread.stop()
+            
+        # Загружаем настройки из секции model вместо detection
         model_settings = self.config.get_model_settings()
+        
+        # Создаем новый поток для обработки видео
         self.thread = VideoThread(
             camera_url,
-            conf=self.config.get_detection_settings()['confidence_threshold'],
-            iou=self.config.get_detection_settings()['iou_threshold'],
-            device=model_settings.get('device', 'cpu'),
-            half=model_settings.get('half', False),
+            conf=model_settings['conf'],
+            iou=model_settings['iou'],
+            device=model_settings['device'],
+            half=model_settings['half'],
             fps=30
         )
-        # Connect the signal with a conversion slot
+        
+        # Подключаем сигналы
         self.thread.change_pixmap_signal.connect(self.update_video_frame)
         self.thread.detection_signal.connect(self.log_detection)
-
-        # Load model if selected
-        if self.model_path:
-            self.thread.set_model(self.model_path)
-
+        
+        # Загружаем модель, если путь задан
+        model_path = self.config.get_model_path()
+        if model_path:
+            if not self.thread.set_model(model_path):
+                self.log_detection(f"Ошибка загрузки модели из {model_path}", "red")
+                return False
+        
+        # Запускаем поток
         self.thread.start()
-        self.config.set_last_camera(camera_url)
+        self.log_detection(f"Выбрана камера: {camera_url}", "blue")
         return True
 
     def stop_video_stream(self):
