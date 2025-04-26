@@ -7,14 +7,6 @@
 
 # BPLA_DIPLOM
 
-<em></em>
-
-<!-- BADGES -->
-<img src="https://img.shields.io/github/license/Yagiar/BPLA_DIPLOM?style=default&logo=opensourceinitiative&logoColor=white&color=0080ff" alt="license">
-<img src="https://img.shields.io/github/last-commit/Yagiar/BPLA_DIPLOM?style=default&logo=git&logoColor=white&color=0080ff" alt="last-commit">
-<img src="https://img.shields.io/github/languages/top/Yagiar/BPLA_DIPLOM?style=default&color=0080ff" alt="repo-top-language">
-<img src="https://img.shields.io/github/languages/count/Yagiar/BPLA_DIPLOM?style=default&color=0080ff" alt="repo-language-count">
-
 <!-- default option, no dependency badges. -->
 
 
@@ -23,40 +15,20 @@
 </div>
 <br>
 
----
 
-## Table of Contents
 
-- [Table of Contents](#table-of-contents)
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-    - [Project Index](#project-index)
-- [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-    - [Usage](#usage)
-    - [Testing](#testing)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+## Содержание
+
+- [Содержание](#содержание)
+- [Структура проекта](#структура-проекта)
+- [Начало работы](#начало-работы)
+    - [Предварительные требования](#предварительные-требования)
+    - [Установка](#установка)
+    - [Использование](#использование)
 
 ---
 
-## Overview
-
-
-
----
-
-## Features
-
-<code>❯ REPLACE-ME</code>
-
----
-
-## Project Structure
+## Структура проекта
 
 ```sh
 └── BPLA_DIPLOM/
@@ -107,57 +79,46 @@
     └── settings.json                # Файл конфигурации
 ```
 
-## Getting Started
+## Начало работы
 
-### Prerequisites
+### Предварительные требования
 
-This project requires the following dependencies:
+Этот проект требует следующих зависимостей:
 
-- **Programming Language:** Python
-- **Package Manager:** Pip
+- **Язык программирования:** Python
+- **Менеджер пакетов:** Pip
 
-### Installation
+### Установка
 
-Build BPLA_DIPLOM from the source and intsall dependencies:
+Соберите BPLA_DIPLOM из исходного кода и установите зависимости:
 
-1. **Clone the repository:**
+1. **Клонируйте репозиторий:**
 
     ```sh
       git clone https://github.com/Yagiar/BPLA_DIPLOM
     ```
 
-2. **Navigate to the project directory:**
+2. **Перейдите в директорию проекта:**
 
     ```sh
       cd BPLA_DIPLOM
     ```
 
-3. **Install the dependencies:**
+3. **Установите зависимости:**
 
 	```sh
 	  pip install -r requirements.txt
 	```
 
-### Usage
+### Использование
 
-Run the project with:
+Запустите проект с помощью:
 
-**Using [pip](https://pypi.org/project/pip/):**
-	```sh
-	  python main.py
-	```
 
+```sh
+   python main.py
+```
 ---
-
-## License
-
-Bpla_diplom is protected under the [LICENSE](https://choosealicense.com/licenses) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
-
----
-
-## Acknowledgments
-
-- Credit `contributors`, `inspiration`, `references`, etc.
 
 <div align="right">
 
@@ -168,5 +129,3 @@ Bpla_diplom is protected under the [LICENSE](https://choosealicense.com/licenses
 
 [back-to-top]: https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square
 
-
----
