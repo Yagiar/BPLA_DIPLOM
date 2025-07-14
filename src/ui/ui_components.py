@@ -73,7 +73,7 @@ class UIComponentsFactory:
         control_layout.addWidget(buttons_group)
         
         # Cameras group
-        cameras_group = QGroupBox("Доступные источники")
+        cameras_group = QGroupBox("Доступные источники видео")
         cameras_layout = QVBoxLayout()
         
         cameras_scroll = QScrollArea()
@@ -136,7 +136,6 @@ class UIComponentsFactory:
         camera_selection_layout.addLayout(active_cam_layout)
         
         # Baseline adjustment input
-
         adjustment_layout = QHBoxLayout()
         adjustment_layout.addWidget(QLabel("Юстировка (px):"))
         adjustment_text = QLineEdit()
@@ -174,11 +173,9 @@ class UIComponentsFactory:
         
         calibration_status_label = QLabel("Калибровка: ❌")
         sync_status_label = QLabel("Синхронизация: ❌")
-        calibration_status_label.setFixedHeight(30)
-        sync_status_label.setFixedHeight(30)
+        
         status_layout.addWidget(calibration_status_label)
         status_layout.addWidget(sync_status_label)
-        status_group.setAlignment(Qt.AlignCenter)
         status_group.setLayout(status_layout)
         
         distance_control_layout.addWidget(status_group)
