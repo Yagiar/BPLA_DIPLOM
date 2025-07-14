@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QComboBox, QScrollArea, QSizePolicy, QWidget, QLineEdit
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QIntValidator
+from PySide6.QtGui import QIcon, QIntValidator, QLineEdit
 
 class UIComponentsFactory:
     """Factory class for creating and managing UI components."""
@@ -162,7 +162,7 @@ class UIComponentsFactory:
         
         measurement_buttons_layout.addWidget(start_distance_button)
         measurement_buttons_layout.addWidget(stop_distance_button)
-        
+
         camera_selection_layout.addLayout(measurement_buttons_layout)
         camera_selection_group.setLayout(camera_selection_layout)
         distance_control_layout.addWidget(camera_selection_group)
