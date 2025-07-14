@@ -412,15 +412,6 @@ class CalibrationDialog(QDialog):
         self.num_frames.setValue(15)
         cameras_layout.addWidget(self.num_frames, 4, 1)
         
-        cameras_layout.addWidget(QLabel("Юстировка:"), 5, 0)
-        self.alignment_value = QDoubleSpinBox()
-        self.alignment_value.setRange(float('-inf'), float('inf'))
-        self.alignment_value.setDecimals(3)
-        self.alignment_value.setValue(0.0)
-        self.alignment_value.setSingleStep(0.1)
-        self.alignment_value.setMinimumWidth(150)  # Сделай шире
-        cameras_layout.addWidget(self.alignment_value, 5, 1)
-        
         cameras_group.setLayout(cameras_layout)
         main_layout.addWidget(cameras_group)
         

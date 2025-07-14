@@ -1,10 +1,10 @@
 from PySide6.QtWidgets import (
     QLabel, QPushButton, QVBoxLayout, QHBoxLayout,
     QTextEdit, QGroupBox, QRadioButton, QButtonGroup,
-    QComboBox, QScrollArea, QSizePolicy, QWidget
+    QComboBox, QScrollArea, QSizePolicy, QWidget, QLineEdit
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QIntValidator
 
 class UIComponentsFactory:
     """Factory class for creating and managing UI components."""
@@ -73,7 +73,7 @@ class UIComponentsFactory:
         control_layout.addWidget(buttons_group)
         
         # Cameras group
-        cameras_group = QGroupBox("Доступные источники видео")
+        cameras_group = QGroupBox("Доступные источники")
         cameras_layout = QVBoxLayout()
         
         cameras_scroll = QScrollArea()
@@ -135,6 +135,20 @@ class UIComponentsFactory:
         active_cam_layout.addWidget(active_cam_combo)
         camera_selection_layout.addLayout(active_cam_layout)
         
+        # Baseline adjustment input
+
+        adjustment_layout = QHBoxLayout()
+        adjustment_layout.addWidget(QLabel("Юстировка (px):"))
+        adjustment_text = QLineEdit()
+        adjustment_text.setPlaceholderText("Введите значение в пикселях")
+        adjustment_text.setValidator(QIntValidator(1, 1000))
+        adjustment_text.setText("1")
+        adjustment_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        adjustment_layout.addWidget(adjustment_text)
+        camera_selection_layout.addLayout(adjustment_layout)
+        # Альтернативный вариант с сохранением стиля приложения
+        adjustment_text.setStyleSheet("background-color: #e8f4f8; color: #333333; border: 1px solid #4caf50; border-radius: 4px; padding: 4px;")
+        
         # Measurement buttons
         measurement_buttons_layout = QHBoxLayout()
         
@@ -160,9 +174,11 @@ class UIComponentsFactory:
         
         calibration_status_label = QLabel("Калибровка: ❌")
         sync_status_label = QLabel("Синхронизация: ❌")
-        
+        calibration_status_label.setFixedHeight(30)
+        sync_status_label.setFixedHeight(30)
         status_layout.addWidget(calibration_status_label)
         status_layout.addWidget(sync_status_label)
+        status_group.setAlignment(Qt.AlignCenter)
         status_group.setLayout(status_layout)
         
         distance_control_layout.addWidget(status_group)
